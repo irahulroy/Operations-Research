@@ -37,6 +37,7 @@ model <- MIPModel()%>%
   add_constraint(sum_expr(w[[1]][i]*x[i], i = 1:n) <= 100)%>%
   add_constraint(sum_expr(w[[2]][i]*x[i], i = 1:n) >= 10)%>%
   add_constraint(sum_expr(w[[3]][i]*x[i], i = 1:n) <= 5)%>%
+  add_constraint(x[i] >= 0, i = 1:n)%>%
   solve_model(with_ROI(solver = "glpk"))
 
 # optimum solution
@@ -129,4 +130,54 @@ model%>%
 
 ## ---------------------------------------------------------------------------------------------
 
+## transportation problem
+# p supply points and q demand points
+# capacity of ith supply point is si
+# minimum requirement of jth demand point is dj
+# cost of transporting goods from ith supply point to jth demand point is cij
+# distribute demand to minimize cost
+
+# number of supply points
+p <- 3
+
+# number of demand points
+q <- 4
+
+# capacity of supply points
+s <- list(35, 50, 40)
+
+# requirement of demand units
+d <- list(45, 20, 30, 30)
+
+# cost matrix
+# p rows (supply points) and q columns (demand points) 
+# c[i, j] = cost of supplying from ith supply point to jth demand point
+cost <- data.frame(c1 = c(8, 9, 14),
+                   c2 = c(6, 12, 9),
+                   c3 = c(10, 13, 16),
+                   c4 = c(9, 7, 5)) 
+
+# cost of supplying from ith supply point to jth demand point
+i <- 3; j <- 3
+cost[i, j]
+
+# assignment model (ip)
+model <- MIPModel()%>%
+  add_variable(x[i, j], i = 1:p, j = 1:q, type = "continuous")%>%
+  set_objective(sum_expr(cost[i, j] * x[i, j], i = 1:p, j = 1:q), "min")%>%
+  add_constraint(sum_expr(x[i, j], j = 1:q) <= s[[i]], i = 1:p)%>%
+  add_constraint(sum_expr(x[i, j], i = 1:p) >= d[[j]], j = 1:q)%>% 
+  add_constraint(x[i, j] >= 0, i = 1:p, j = 1:q)%>%
+  solve_model(with_ROI(solver = "glpk"))
+
+# optimum solution
+model%>%
+  get_solution(x[i, j])%>%
+  filter(value > 0)
+
+# objective function value
+model%>%
+  objective_value()
+
+## ---------------------------------------------------------------------------------------------
 
