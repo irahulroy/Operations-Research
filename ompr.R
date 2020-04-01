@@ -181,3 +181,42 @@ model%>%
 
 ## ---------------------------------------------------------------------------------------------
 
+## shortest-path problem
+# import igraph package
+library(igraph)
+
+# define links from sources to targets
+links <- data.frame(source = c("1", "1", "2", "2", "3", "4", "5"), 
+                    target = c("2", "3", "4", "5", "5", "6", "6"), 
+                    weight = c(4, 3, 3, 2, 3, 2, 2))
+  
+# build network from links
+nw <- graph_from_data_frame(links, directed = T)
+
+# plot network
+set.seed(2020)
+plot.igraph(nw, 
+            main = "Network", 
+            vertex.color = "cyan", 
+            edge.color = "black",
+            edge.arrow.size = 0.5,
+            edge.label = links[["weight"]],
+            edge.label.color = "black")
+
+# shortest path
+# since graph is weighted, dijkstra's algorithm is used
+# shortest paths are specified
+all_shortest_paths(nw,
+                   from = 1,
+                   to = 6,
+                   mode = c("all"))
+
+# shortest distance is specified
+distances(nw,
+          v = 1,
+          to = 6,
+          algorithm = "dijkstra",
+          mode = "all")
+
+## ---------------------------------------------------------------------------------------------
+
